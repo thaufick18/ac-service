@@ -13,7 +13,9 @@ A responsive Flask/MySQL application for customer repair bookings, technician jo
 ```text
 ac_repair_system/
 ├── app.py
+├── api/index.py
 ├── config.py
+├── vercel.json
 ├── schema.sql
 ├── requirements.txt
 ├── README.md
@@ -105,6 +107,37 @@ flask --app app run --debug
 ```
 
 Open <http://127.0.0.1:5000>. Flask's development server is for local use only; deploy with a production WSGI server and HTTPS.
+
+## Deploy to Vercel
+
+`api/index.py` exposes the Flask application as a Vercel Python Function. `vercel.json` routes requests to it and bundles the Jinja templates and static assets.
+
+Vercel cannot connect to the local MySQL instance at `127.0.0.1`. Before deployment, provision a hosted MySQL 8 database reachable from Vercel, apply `schema.sql` to it, and create a restricted database user. In the Vercel project settings, add these Production environment variables:
+
+- `SECRET_KEY`: a strong random value, generated with the command in the MySQL setup section.
+- `MYSQL_HOST`: the hosted database hostname, not `127.0.0.1` or `localhost`.
+- `MYSQL_PORT`: the provider's MySQL port, usually `3306`.
+- `MYSQL_USER`, `MYSQL_PASSWORD`, and `MYSQL_DATABASE`: credentials and database name for the restricted application user.
+- `SESSION_COOKIE_SECURE`: `true`.
+
+Import `thaufick18/ac-service` into Vercel with the repository root as the project root, or use the CLI from this directory:
+
+```powershell
+npx vercel login
+npx vercel link
+npx vercel deploy --prod
+```
+
+The CLI requires an authenticated Vercel account. This workspace has no Vercel login yet, and deployment must wait until the hosted MySQL endpoint and Vercel Production variables are configured; deploying against the local `.env` would produce database errors. Never commit `.env` or `.env*.local`.
+
+To create the first production administrator without adding credentials to source control, pull the Production environment locally and run the interactive initializer:
+
+```powershell
+npx vercel env pull .env.production.local
+.\.venv\Scripts\flask.exe --env-file .env.production.local --app app init-admin
+```
+
+The initializer reads the administrator password without echoing it. The pulled environment file is ignored by Git.
 
 ## Booking-to-Repair Test
 
