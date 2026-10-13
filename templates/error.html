@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block title %}{{ code }} | CoolCare{% endblock %}
+{% block content %}<section class="workspace-page error-page"><div class="container text-center"><span class="error-icon"><i class="bi bi-wind"></i></span><p class="eyebrow">{{ code }} · SERVICE INTERRUPTED</p><h1>{{ message }}</h1><a class="btn btn-primary mt-3" href="{{ url_for('index') }}">Return home <i class="bi bi-arrow-right ms-2"></i></a></div></section>{% endblock %}
